@@ -52,4 +52,14 @@ def day_2q2
   puts datas.select{|line| PasswordLine.new(line).valid_policy2?}.size
 end
 
-day_2q2
+# On day 3, he shall sleep under a tree
+
+def day_4
+  passports = File.read("#{__dir__}/day4-input.txt").split(/\n\n/)
+  puts passports.select { |pass|
+    keys = pass.split(/[ \n]/).map{|pair| pair.split(/:/).first }.sort - ["cid"]
+    keys == ["byr", "ecl", "eyr", "hcl", "hgt", "iyr", "pid"]
+  }.size
+end
+
+day_4
