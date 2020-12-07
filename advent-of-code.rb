@@ -57,8 +57,23 @@ end
 def day_4
   passports = File.read("#{__dir__}/day4-input.txt").split(/\n\n/)
   puts passports.select { |pass|
-    keys = pass.split(/[ \n]/).map{|pair| pair.split(/:/).first }.sort - ["cid"]
-    keys == ["byr", "ecl", "eyr", "hcl", "hgt", "iyr", "pid"]
+    #debugger
+    dataline = pass.split(/[ \n]/).map{|pair| pair.split(/:/) }.to_h
+    dataline.delete("byr") unless (1920..2002).include? dataline["byr"].to_i
+    dataline.delete("iyr") unless (2010..2020).include? dataline["iyr"].to_i
+    dataline.delete("eyr") unless (2020..2030).include? dataline["eyr"].to_i
+    if res = dataline["hgt"]&.match(/([0-9]+)cm$/)
+      dataline.delete("hgt") unless (150..193).include? res[1].to_i
+    elsif res = dataline["hgt"]&.match(/([0-9]+)in$/)
+      dataline.delete("hgt") unless (59..76).include? res[1].to_i
+    else
+      dataline.delete("hgt")
+    end
+    dataline.delete("hcl") unless dataline["hcl"]&.match(/\A#[0-9a-f]{6}\Z/i)
+    valid_eye_color = %w[amb blu brn gry grn hzl oth]
+    dataline.delete("ecl") unless valid_eye_color.include?(dataline["ecl"])
+    dataline.delete("pid") unless dataline["pid"]&.match(/\A[0-9]{9}\Z/)
+    (dataline.keys.sort - ["cid"]) == ["byr", "ecl", "eyr", "hcl", "hgt", "iyr", "pid"]
   }.size
 end
 
