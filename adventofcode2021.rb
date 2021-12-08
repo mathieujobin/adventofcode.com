@@ -1,9 +1,12 @@
+# frozen_string_literal: true
+
 require 'byebug'
 
 def day1
-  calculation = File.read('input-day1.txt').split("\n").map(&:to_i).reduce(increase: 0, decrease: 0, last: nil) {
-    |acc, i|
-
+  calculation = File.read('input-day1.txt').split("\n").map(&:to_i).each_with_object(
+    increase: 0, decrease: 0,
+    last: nil
+  ) do |i, acc|
     unless acc[:last].nil?
       if i > acc[:last]
         acc[:increase] += 1
@@ -12,10 +15,9 @@ def day1
       end
     end
     acc[:last] = i
-    acc
-  }
+  end
   puts calculation.inspect
-rescue => e
+rescue StandardError => e
   debugger
 end
 
@@ -30,7 +32,8 @@ class LastThree
   end
 
   def sum
-    raise "invalid" if @last_three.length < 3
+    raise 'invalid' if @last_three.length < 3
+
     @last_three.reduce(:+)
   end
 
@@ -56,33 +59,53 @@ class LastThree
 end
 
 def day1_part2
-  calculation = File.read('input-day1.txt').split("\n").map(&:to_i).reduce(increase: 0, decrease: 0, last_three: LastThree.new) {
-    |acc, i|
-
+  calculation = File.read('input-day1.txt').split("\n").map(&:to_i).each_with_object(
+    increase: 0, decrease: 0,
+    last_three: LastThree.new
+  ) do |i, acc|
     acc[:last_three].compute(acc, i)
-
-    acc
-  }
+  end
   puts calculation.inspect
-rescue => e
+rescue StandardError => e
   debugger
 end
 
 class Day2CommandParser
 end
 
-def day2
-  calculation = File.read('input-day2.txt').split("\n").map(&:to_i).reduce(forward: 0, depth: 0, parser: Day2CommandParser.new) {
-    |acc, i|
-
-    acc[:last_three].compute(acc, i)
-
-    acc
-  }
+def day2(part)
+  calculation = File.read('input-day2.txt').split("\n").map(&:split).each_with_object(
+    aim: 0,
+    forward: 0,
+    depth: 0
+  ) do |(cmd, value), acc|
+    if part == :part1
+      case cmd
+      when 'up'
+        acc[:depth] -= value.to_i
+      when 'down'
+        acc[:depth] += value.to_i
+      when 'forward'
+        acc[:forward] += value.to_i
+      else
+        raise "invalid input #{[cmd, value].inspect}"
+      end
+    else
+      case cmd
+      when 'up'
+        acc[:aim] -= value.to_i
+      when 'down'
+        acc[:aim] += value.to_i
+      when 'forward'
+        acc[:depth] += value.to_i * acc[:aim]
+        acc[:forward] += value.to_i
+      else
+        raise "invalid input #{[cmd, value].inspect}"
+      end
+    end
+  end
   puts calculation.inspect
-rescue => e
-  debugger
+  puts "Answer: #{calculation[:forward] * calculation[:depth]}"
 end
 
-day2
-
+day2 :part2
