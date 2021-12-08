@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'byebug'
 
 def day1
@@ -17,8 +15,6 @@ def day1
     acc[:last] = i
   end
   puts calculation.inspect
-rescue StandardError => e
-  debugger
 end
 
 class LastThree
@@ -66,11 +62,6 @@ def day1_part2
     acc[:last_three].compute(acc, i)
   end
   puts calculation.inspect
-rescue StandardError => e
-  debugger
-end
-
-class Day2CommandParser
 end
 
 def day2(part)
@@ -108,4 +99,28 @@ def day2(part)
   puts "Answer: #{calculation[:forward] * calculation[:depth]}"
 end
 
-day2 :part2
+def day3(part)
+  bits_collector = File.read('input-day3.txt').split("\n").each_with_object({}) do |line, acc|
+    line.chars.each_with_index do |c, i|
+      acc[i] ||= []
+      acc[i] << c
+    end
+  end
+
+  result = bits_collector.each_with_object(gamma: "", epsylon: "") do |(pos, values), acc|
+    # puts pos.inspect
+    counts = values.group_by(&:itself).map { |k, v| [k, v.length] }.to_h
+    if counts["0"] > counts["1"]
+      acc[:gamma] << "0"
+      acc[:epsylon] << "1"
+    else
+      acc[:gamma] << "1"
+      acc[:epsylon] << "0"
+    end
+    acc
+  end
+  puts result.inspect
+  puts "Answer: #{result[:gamma].to_i(2) * result[:epsylon].to_i(2)}"
+end
+
+day3 :part1
