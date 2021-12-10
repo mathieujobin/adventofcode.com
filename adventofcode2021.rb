@@ -104,8 +104,8 @@ class Day3Solver
     @data ||= File.read('input-day3.txt').split("\n")
   end
 
-  def bits_collector
-    bits_collector ||= data.each_with_object({}) do |line, acc|
+  def bits_collector(data)
+    data.each_with_object({}) do |line, acc|
       line.chars.each_with_index do |c, i|
         acc[i] ||= []
         acc[i] << c
@@ -118,7 +118,7 @@ class Day3Solver
   end
 
   def solve_part1
-    result = bits_collector.each_with_object(gamma: "", epsylon: "") do |(pos, values), acc|
+    result = bits_collector(data).each_with_object(gamma: "", epsylon: "") do |(pos, values), acc|
       # puts pos.inspect
       counts = count_unique_values(values)
       if counts["0"] > counts["1"]
@@ -153,8 +153,8 @@ class Day3Solver
     end
   end
 
-  def locate_indexes(values, acc, rating, condition)
-    current_values = values_at(values, acc[rating])
+  def locate_indexes(current_values, acc, rating, condition)
+    # current_values = values_at(values, acc[rating])
     counts = count_unique_values(current_values)
     # Eventually, one side disappears, for the next condition not to fails. I ||= 0 here
     counts["0"] ||= 0
@@ -167,15 +167,26 @@ class Day3Solver
       end
   end
 
-  def solve_one_rating(values, acc, rating, condition)
-    locate_indexes(values, acc, rating, condition) unless found_value? acc[rating]
+  def solve_one_rating(current_data, pos, acc, rating, condition)
+    current_values = bits_collector(current_data)[pos]
+    puts acc[rating].inspect
+    locate_indexes(current_values, acc, rating, condition)
+    current_data = values_at(current_data, acc[rating])
+    puts [pos, current_data.size, rating].inspect
+    if found_value? acc[rating]
+      # debugger
+      current_data.first.to_i(2)
+      # current_data[acc[rating].last].to_i(2)
+    else
+      solve_one_rating(current_data, pos+1, acc, rating, condition)
+    end
   end
 
   def display_answer(result)
     puts result.inspect
     final = 1
     [:oxygen, :co2].each do |rating|
-      answer = data[result[rating].last].to_i(2)
+      answer = result[rating]
       final *= answer
       puts "Answer #{rating}: #{answer}"
     end
@@ -183,20 +194,16 @@ class Day3Solver
   end
 
   def solve_part2
-    #12.times do |i|
-    #end
-    #oxygen_generator, co2_scrubber = split_indexes(i)
-    # I am going to keep the index of numbers that are good, because at this point, I have arrays sorted by position.
-    result = bits_collector.each_with_object(oxygen: (0..-1), co2: (0..-1)) do |(pos, values), acc|
-      # puts pos.inspect
-      #debugger if pos == 10
-      puts acc.inspect
-      # this is annoying, the first time I execute it twice for nothing.
-      solve_one_rating(values, acc, :oxygen, ->(a,b) { a > b })
-      solve_one_rating(values, acc, :co2, ->(a,b) { a <= b })
 
-      acc
-    end
+    indexes_hash = {oxygen: (0..-1), co2: (0..-1)}
+    result = {oxygen: 0, co2: 0}
+    result[:oxygen] = solve_one_rating(data.dup, 0, indexes_hash, :oxygen, ->(a,b) { a > b })
+    result[:co2] = solve_one_rating(data.dup, 0, indexes_hash, :co2, ->(a,b) { a < b })
+
+
+    # I am going to keep the index of numbers that are good, because at this point, I have arrays sorted by position.
+    #result = .each_with_object() do |(pos, values), acc|
+
     display_answer result
   end
 end
