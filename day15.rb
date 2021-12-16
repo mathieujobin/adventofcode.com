@@ -57,10 +57,29 @@ class Day15Solver
     next_pos if path_is_complete?(path + [next_pos])
   end
 
+  def display_skip_counter?
+    if @skip_counter > 1_000_000
+      @skip_counter % 1_000_000 == 0
+    elsif @skip_counter > 1_000_000
+      @skip_counter % 1_000_000 == 0
+    elsif @skip_counter > 100_000
+      @skip_counter % 100_000 == 0
+    elsif @skip_counter > 10_000
+      @skip_counter % 10_000 == 0
+    elsif @skip_counter > 1000
+      @skip_counter % 1000 == 0
+    elsif @skip_counter > 100
+      @skip_counter % 100 == 0
+    else
+      false
+    end
+  end
+
   def traverse_sub_trail(direction, pos, path)
-    if path.size > data.length && path_score(path) > @lowest_path_score
+    # Skip calculation when score is already higher than lowest score
+    if path.size > 2 && path_score(path) > @lowest_path_score
       @skip_counter+=1
-      puts "Skipped #{@skip_counter} times" if @skip_counter % 10000 == 0
+      puts "Skipped #{@skip_counter} times (at: #{path.size})" if display_skip_counter?
       return
     end
     current_value = data[pos[0]][pos[1]]
