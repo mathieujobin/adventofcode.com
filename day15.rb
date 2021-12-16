@@ -1,6 +1,12 @@
 #!/usr/bin/env ruby
 
 require 'byebug'
+require 'simplecov'
+
+SimpleCov.start do
+  track_files "**/*.rb"
+  command_name 'day15'
+end if false
 
 class Day15Solver
 
