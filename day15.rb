@@ -8,6 +8,7 @@ class Day15Solver
     @filename = filename
     @trails = {}
     @max_length = 0
+    @lowest_path_score = Float::INFINITY
   end
 
   def data
@@ -32,7 +33,13 @@ class Day15Solver
         @max_length = path.size
         puts "New max length: #{@max_length}/#{path_max_length}"
       end
-      puts "Path complete: #{path_score(path)}:: #{path}" if complete
+      if complete
+        score = path_score(path)
+        if score < @lowest_path_score
+          @lowest_path_score = score
+          puts "New lowest score: #{@lowest_path_score}"
+        end
+      end
     end
   end
 
