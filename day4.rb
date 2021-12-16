@@ -3,12 +3,17 @@ require 'looksee'
 
 BOARD_SIZE = 5
 
+$participating_boards = 101.times.to_a
+
 class BingoBoard
+  attr_reader :has_won, :board_id, :numbers, :marked_moves
+
   def initialize(numbers)
     @board_id = self.class.next_board_id
     @numbers = numbers.map{|row| row.split(' ').map(&:to_i)}
     @states = {}
     @marked_moves = []
+    @has_won = false
   end
 
   def self.next_board_id
@@ -17,19 +22,21 @@ class BingoBoard
   end
 
   def declare_victory!
-    puts "I won #{to_s} with #{score} points"
-    puts to_s
-    exit 0
+    puts "I won (#{board_id}) with #{score} points"
+    @has_won = true
+    debugger
+    $participating_boards.delete(board_id)
   end
 
   def score
-    (@numbers.flatten - @marked_moves).sum * @marked_moves.last
+    (numbers.flatten - marked_moves).sum * marked_moves.last
   end
 
   def play(move)
+    return if has_won
+
     if pos = number_includes(move)
       mark_state(move, pos)
-      display_marking_move(move, pos)
       if bingo?
         declare_victory!
       end
@@ -37,7 +44,7 @@ class BingoBoard
   end
 
   def number_includes(move)
-    @numbers.each_with_index do |row, row_index|
+    numbers.each_with_index do |row, row_index|
       row.each_with_index do |value, col_index|
         if value == move
           return [row_index, col_index]
@@ -55,7 +62,7 @@ class BingoBoard
 
   def display_marking_move(move, pos)
     puts %Q{
-      Marking Move #{move} at #{pos.join(',')} on board (#{@board_id})
+      Marking Move #{move} at #{pos.join(',')} on board (#{board_id})
     }
   end
 
@@ -93,8 +100,8 @@ class Day4Solver
   end
 
   def play
-    moves.each do |move|
-      puts "Move: #{move}"
+    moves.each_with_index do |move, index|
+      puts "Move ##{index}: #{move}"
       boards.each do |board|
         board.play(move)
       end
