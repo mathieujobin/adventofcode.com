@@ -7,6 +7,7 @@ class Day15Solver
   def initialize(filename)
     @filename = filename
     @trails = {}
+    @max_length = 0
   end
 
   def data
@@ -27,7 +28,10 @@ class Day15Solver
 
   def path_is_complete?(path)
     (path.size == path_max_length).tap do |complete|
-      # puts [complete, path.size, data.length, data[0].length, data.length + data[0].length].inspect
+      if false && path.size > @max_length
+        @max_length = path.size
+        puts "New max length: #{@max_length}/#{path_max_length}"
+      end
       puts "Path complete: #{path_score(path)}:: #{path}" if complete
     end
   end
