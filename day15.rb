@@ -9,6 +9,7 @@ class Day15Solver
     @trails = {}
     @max_length = 0
     @lowest_path_score = Float::INFINITY
+    @skip_counter = 0
   end
 
   def data
@@ -29,11 +30,13 @@ class Day15Solver
 
   def path_is_complete?(path)
     (path.size == path_max_length).tap do |complete|
+      # Debug: display new path.size when we reach new higher value
       if false && path.size > @max_length
         @max_length = path.size
         puts "New max length: #{@max_length}/#{path_max_length}"
       end
       if complete
+        # only display score when we reach new lowest score
         score = path_score(path)
         if score < @lowest_path_score
           @lowest_path_score = score
@@ -53,6 +56,11 @@ class Day15Solver
   end
 
   def traverse_sub_trail(direction, pos, path)
+    if path.size > data.length && path_score(path) > @lowest_path_score
+      @skip_counter+=1
+      puts "Skipped #{@skip_counter} times" if @skip_counter % 10000 == 0
+      return
+    end
     current_value = data[pos[0]][pos[1]]
     unless path_is_complete?(path)
       if direction == :right
