@@ -10,6 +10,7 @@ class Day15Solver
     @max_length = 0
     @lowest_path_score = Float::INFINITY
     @skip_counter = 0
+    @completed_path_counter = 0
   end
 
   def data
@@ -36,11 +37,12 @@ class Day15Solver
         puts "New max length: #{@max_length}/#{path_max_length}"
       end
       if complete
+        @completed_path_counter += 1
         # only display score when we reach new lowest score
         score = path_score(path)
         if score < @lowest_path_score
           @lowest_path_score = score
-          puts "New lowest score: #{@lowest_path_score}"
+          puts "New lowest score: #{@lowest_path_score}, completed path: #{@completed_path_counter}"
         end
       end
     end
@@ -92,6 +94,7 @@ class Day15Solver
   def run
     traverse_sub_trail(:right, start_pos.dup, [])
     traverse_sub_trail(:down, start_pos.dup, [])
+    puts "Completed #{@completed_path_counter} paths"
   end
 end
 
@@ -100,7 +103,7 @@ if ARGV[0]
   solver.run
 else
   puts "Please provide a filename and sort the output, such as..."
-  puts "ruby day15.rb <filename> | sort -n | head"
+  puts "ruby day15.rb <filename>"
 end
 
 
