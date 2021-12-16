@@ -12,8 +12,6 @@ class Day15Solver
 
   def initialize(filename)
     @filename = filename
-    @trails = {}
-    @max_length = 0
     @lowest_path_score = Float::INFINITY
     @skip_counter = 0
     @completed_path_counter = 0
@@ -37,11 +35,7 @@ class Day15Solver
 
   def path_is_complete?(path)
     (path.size == path_max_length).tap do |complete|
-      # Debug: display new path.size when we reach new higher value
-      if false && path.size > @max_length
-        @max_length = path.size
-        puts "New max length: #{@max_length}/#{path_max_length}"
-      end
+
       if complete
         @completed_path_counter += 1
         # only display score when we reach new lowest score
@@ -81,9 +75,26 @@ class Day15Solver
     end
   end
 
+  def exec_direction_in_subprocess(direction, pos_x, pos_y, path)
+    exec_direction(direction, pos_x, pos_y, path)
+  end
+
+  def exec_direction(direction, pos_x, pos_y, path)
+    next_value = data[pos_x][pos_y] rescue nil
+    if next_value.nil?
+      puts "reached far #{direction} #{path.length}" if ENV['DEBUG_DAY15']
+      path_is_complete?(path)
+    else
+      child_path = path.dup + [next_value]
+      puts "Traversing #{direction} from #{pos}(#{current_value}) - #{child_path}" if ENV['DEBUG_DAY15'] || path.size > path_max_length
+      traverse_sub_trail(:right, [pos_x, pos_y], child_path)
+      traverse_sub_trail(:down, [pos_x, pos_y], child_path)
+    end
+  end
+
   def traverse_sub_trail(direction, pos, path)
     # Skip calculation when score is already higher than lowest score
-    if path.size > 2 && path_score(path) > @lowest_path_score
+    if path.size > data.size && path_score(path) > @lowest_path_score
       @skip_counter+=1
       puts "Skipped #{@skip_counter} times (at: #{path.size})" if display_skip_counter?
       return
@@ -91,27 +102,9 @@ class Day15Solver
     current_value = data[pos[0]][pos[1]]
     unless path_is_complete?(path)
       if direction == :right
-        next_value = data[pos[0]][pos[1]+1]
-        if next_value.nil?
-          puts "reached far right #{path.length}" if ENV['DEBUG_DAY15']
-          path_is_complete?(path)
-        else
-          child_path = path.dup + [next_value]
-          puts "Traversing right from #{pos}(#{current_value}) - #{child_path}" if ENV['DEBUG_DAY15'] || path.size > path_max_length
-          traverse_sub_trail(:right, [pos[0], pos[1]+1], child_path)
-          traverse_sub_trail(:down, [pos[0], pos[1]+1], child_path)
-        end
+        exec_direction_in_subprocess(:right, pos[0], pos[1]+1, path)
       else
-        next_value = data[pos[0]+1][pos[1]] rescue nil
-        if next_value.nil?
-          puts "reached bottom #{path.length}" if ENV['DEBUG_DAY15']
-          path_is_complete?(path)
-        else
-          child_path = path.dup + [next_value]
-          puts "Traversing down from #{pos}(#{current_value}) - #{child_path}" if ENV['DEBUG_DAY15'] || path.size > path_max_length
-          traverse_sub_trail(:right, [pos[0]+1, pos[1]], child_path)
-          traverse_sub_trail(:down, [pos[0]+1, pos[1]], child_path)
-        end
+        exec_direction_in_subprocess(:down, pos[0]+1, pos[1], path)
       end
     end
   end
