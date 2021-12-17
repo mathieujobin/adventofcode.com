@@ -15,6 +15,7 @@ class Day15Solver
     @lowest_path_score = Float::INFINITY
     @skip_counter = 0
     @completed_path_counter = 0
+    @start_time = 0
   end
 
   def data
@@ -42,7 +43,7 @@ class Day15Solver
         score = path_score(path)
         if score < @lowest_path_score
           @lowest_path_score = score
-          puts "New lowest score: #{@lowest_path_score}, completed path: #{@completed_path_counter}"
+          puts "New lowest score: #{@lowest_path_score}, completed path: #{@completed_path_counter} @#{Time.now - @start_time}"
         end
       end
     end
@@ -90,13 +91,16 @@ class Day15Solver
       traverse_sub_trail(:right, [pos_x, pos_y], child_path)
       traverse_sub_trail(:down, [pos_x, pos_y], child_path)
     end
+
+  def elapsed
+    ActiveSupport::Duration.build(Time.now - @start_time).parts
   end
 
   def traverse_sub_trail(direction, pos, path)
     # Skip calculation when score is already higher than lowest score
     if path.size > data.size && path_score(path) > @lowest_path_score
       @skip_counter+=1
-      puts "Skipped #{@skip_counter} times (at: #{path.size})" if display_skip_counter?
+      puts "Skipped #{@skip_counter} times (at: #{path.size}) @#{elapsed}" if display_skip_counter?
       return
     end
     current_value = data[pos[0]][pos[1]]
@@ -110,8 +114,9 @@ class Day15Solver
   end
 
   def run
-    traverse_sub_trail(:right, start_pos.dup, [])
+    @start_time = Time.now
     traverse_sub_trail(:down, start_pos.dup, [])
+    traverse_sub_trail(:right, start_pos.dup, [])
     puts "Completed #{@completed_path_counter} paths"
   end
 end
