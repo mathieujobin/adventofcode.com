@@ -1,0 +1,24 @@
+Skipped 697720000 times
+Skipped 697730000 times
+Skipped 697740000 times
+Skipped 697750000 times
+^Cday15.rb:50:in `to_i': Interrupt
+	from day15.rb:50:in `map'
+	from day15.rb:50:in `path_score'
+	from day15.rb:59:in `traverse_sub_trail'
+	from day15.rb:85:in `traverse_sub_trail'
+	from day15.rb:86:in `traverse_sub_trail'
+	from day15.rb:86:in `traverse_sub_trail'
+...
+	from day15.rb:74:in `traverse_sub_trail'
+	from day15.rb:74:in `traverse_sub_trail'
+	from day15.rb:74:in `traverse_sub_trail'
+	from day15.rb:74:in `traverse_sub_trail'
+	from day15.rb:93:in `run'
+	from day15.rb:100:in `<main>'
+
+
+real	5500m41.343s
+user	2950m4.751s
+sys	18m13.959s
+:x

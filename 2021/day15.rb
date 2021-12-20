@@ -1,7 +1,10 @@
 #!/usr/bin/env ruby
 
+require 'parallel'
 require 'byebug'
 require 'simplecov'
+require 'looksee'
+require 'redis'
 
 SimpleCov.start do
   track_files "**/*.rb"
@@ -10,23 +13,43 @@ end if false
 
 class Day15Solver
 
+  attr_reader :stdin, :stdout, :filename
+
   def initialize(filename)
     @filename = filename
     @lowest_path_score = Float::INFINITY
-    @skip_counter = 0
+    save_in_redis 'skip_counter', 0
     @completed_path_counter = 0
+    # @stdin, @stdout = IO.pipe
   end
 
+  def read_in_redis(key)
+    Redis.new.get("day15::#{key}")
+  end
+  def save_in_redis(key, value)
+    Redis.new.set("day15::#{key}", value)
+  end
+
+  #def puts(msg)
+  #  @stdout.puts msg
+  #end
+
   def data
-    @data ||= File.read(@filename).split("\n").map(&:chars)
+    @data ||= File.read(filename).split("\n").map(&:chars)
   end
 
   def start_pos
     [0, 0]
   end
 
+  def skip_counter
+    read_in_redis 'skip_counter'
+  end
+
   def destination
-    @destination ||= [data.length - 1, data[0].length - 1]
+    @destination ||= begin
+      read_in_redis('destination') || save_in_redis('destination', [data.length - 1, data[0].length - 1])
+    end
   end
 
   def path_max_length
@@ -58,25 +81,35 @@ class Day15Solver
   end
 
   def display_skip_counter?
-    if @skip_counter > 1_000_000
-      @skip_counter % 1_000_000 == 0
-    elsif @skip_counter > 1_000_000
-      @skip_counter % 1_000_000 == 0
-    elsif @skip_counter > 100_000
-      @skip_counter % 100_000 == 0
-    elsif @skip_counter > 10_000
-      @skip_counter % 10_000 == 0
-    elsif @skip_counter > 1000
-      @skip_counter % 1000 == 0
-    elsif @skip_counter > 100
-      @skip_counter % 100 == 0
+    if skip_counter > 10_000_000
+      skip_counter % 1_000_000 == 0
+    elsif skip_counter > 1_000_000
+      skip_counter % 1_000_000 == 0
+    elsif skip_counter > 100_000
+      skip_counter % 100_000 == 0
+    elsif skip_counter > 10_000
+      skip_counter % 10_000 == 0
+    elsif skip_counter > 1000
+      skip_counter % 1000 == 0
+    elsif skip_counter > 100
+      skip_counter % 100 == 0
     else
       false
     end
   end
 
+  def wait_if_max_processes_reached(max)
+    debugger
+    while Process.children.size >= max
+      sleep 0.1
+    end
+  end
+
   def exec_direction_in_subprocess(direction, pos_x, pos_y, path)
-    exec_direction(direction, pos_x, pos_y, path)
+    #wait_if_max_processes_reached(15)
+    #Process.fork do
+    #  exec_direction(direction, pos_x, pos_y, path)
+    #end
   end
 
   def exec_direction(direction, pos_x, pos_y, path)
@@ -87,24 +120,25 @@ class Day15Solver
     else
       child_path = path.dup + [next_value]
       puts "Traversing #{direction} from #{pos}(#{current_value}) - #{child_path}" if ENV['DEBUG_DAY15'] || path.size > path_max_length
-      traverse_sub_trail(:right, [pos_x, pos_y], child_path)
-      traverse_sub_trail(:down, [pos_x, pos_y], child_path)
+      Parallel.each([:right, :down], in_processes: 1) do |direction|
+        traverse_sub_trail(direction, [pos_x, pos_y], child_path)
+      end
     end
   end
 
   def traverse_sub_trail(direction, pos, path)
     # Skip calculation when score is already higher than lowest score
     if path.size > data.size && path_score(path) > @lowest_path_score
-      @skip_counter+=1
-      puts "Skipped #{@skip_counter} times (at: #{path.size})" if display_skip_counter?
+      skip_counter+=1
+      puts "Skipped #{skip_counter} times (at: #{path.size})" if display_skip_counter?
       return
     end
     current_value = data[pos[0]][pos[1]]
     unless path_is_complete?(path)
       if direction == :right
-        exec_direction_in_subprocess(:right, pos[0], pos[1]+1, path)
+        exec_direction(:right, pos[0], pos[1]+1, path)
       else
-        exec_direction_in_subprocess(:down, pos[0]+1, pos[1], path)
+        exec_direction(:down, pos[0]+1, pos[1], path)
       end
     end
   end
@@ -112,6 +146,10 @@ class Day15Solver
   def run
     traverse_sub_trail(:right, start_pos.dup, [])
     traverse_sub_trail(:down, start_pos.dup, [])
+    Process.waitall
+    @stdout.close
+    results = @stdin.read
+    @stdin.close
     puts "Completed #{@completed_path_counter} paths"
   end
 end
