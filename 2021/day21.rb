@@ -83,4 +83,4 @@ part1_input = "Player 1 starting position: 1
 Player 2 starting position: 5
 "
 
-Day21Game.new(example_input).play
+Day21Game.new(part1_input).play
