@@ -5,10 +5,15 @@ require 'looksee'
 
 class Day21Game
   class DeterministicDie
-    attr_reader :current_value
+    attr_reader :current_value, :die_counter
+    def initialize
+      @die_counter = 0
+      @current_value = 0
+    end
+
     def roll
-      @current_value ||= 0
-      if @current_value > 100
+      @die_counter += 1
+      if @current_value > 99
         @current_value = 1
       else
         @current_value += 1
@@ -52,7 +57,22 @@ class Day21Game
       @players[@cur_player].score += @players[@cur_player].cur_position
       puts "Player #{@cur_player + 1} rolls #{three_dices} and moves to space #{@players[@cur_player].cur_position} for a total score of #{@players[@cur_player].score}"
     end
-    puts @players.inspect
+    puts results
+    puts [@die, @players].inspect
+  end
+
+  def results
+    final_value = \
+      if @players[0].score < @players[1].score
+        @die.die_counter * @players[0].score
+      else
+        @die.die_counter * @players[1].score
+      end
+    "Final value: #{final_value}
+    Die counter: #{@die.die_counter}
+    Player 1: #{@players[0].score}
+    Player 2: #{@players[1].score}
+    "
   end
 end
 
