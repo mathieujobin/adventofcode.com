@@ -1,12 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'byebug'
-require 'simplecov'
-
-SimpleCov.start do
-  track_files "**/*.rb"
-  command_name 'day15'
-end if false
+require 'active_support/all'
 
 class Day15Solver
 
@@ -43,7 +38,7 @@ class Day15Solver
         score = path_score(path)
         if score < @lowest_path_score
           @lowest_path_score = score
-          puts "New lowest score: #{@lowest_path_score}, completed path: #{@completed_path_counter} @#{Time.now - @start_time}"
+          puts "New lowest score: #{@lowest_path_score}, completed path: #{@completed_path_counter} @#{elapsed}"
         end
       end
     end
@@ -80,6 +75,12 @@ class Day15Solver
     exec_direction(direction, pos_x, pos_y, path)
   end
 
+  def smaller_next_move(pos_x, pos_y)
+    next_right = data[pos_x+1][pos_y].to_i rescue Float::INFINITY
+    next_down  = data[pos_x][pos_y+1].to_i rescue Float::INFINITY
+    next_right < next_down ? :right : :down
+  end
+
   def exec_direction(direction, pos_x, pos_y, path)
     next_value = data[pos_x][pos_y] rescue nil
     if next_value.nil?
@@ -88,9 +89,15 @@ class Day15Solver
     else
       child_path = path.dup + [next_value]
       puts "Traversing #{direction} from #{pos}(#{current_value}) - #{child_path}" if ENV['DEBUG_DAY15'] || path.size > path_max_length
-      traverse_sub_trail(:right, [pos_x, pos_y], child_path)
-      traverse_sub_trail(:down, [pos_x, pos_y], child_path)
+      if smaller_next_move(pos_x, pos_y) == :right
+        traverse_sub_trail(:right, [pos_x, pos_y], child_path)
+        traverse_sub_trail(:down, [pos_x, pos_y], child_path)
+      else
+        traverse_sub_trail(:down, [pos_x, pos_y], child_path)
+        traverse_sub_trail(:right, [pos_x, pos_y], child_path)
+      end
     end
+  end
 
   def elapsed
     ActiveSupport::Duration.build(Time.now - @start_time).parts
