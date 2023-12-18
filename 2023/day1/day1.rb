@@ -4,9 +4,26 @@ contents = File.read("day1-seed1.txt").split("\n").compact
 
 Numbers = %w[one two three four five six seven eight nine]
 
+def word_to_digit(word)
+    Numbers.index(word)+1
+end
+
+def replace_first_and_last(line)
+    forward_match = line.match(%r[(#{Numbers.join('|')})])
+    reverse_match = line.reverse.match(%r[(#{Numbers.map(&:reverse).join('|')})])
+    if forward_match
+        line.gsub!(forward_match[0], word_to_digit(forward_match[0]).to_s)
+    end
+    if reverse_match
+        bingo = reverse_match[0].reverse
+        puts bingo
+        line.gsub!(bingo, word_to_digit(bingo).to_s)
+    end
+end
+
 def calib_val(line)
     puts "before> #{line}"
-    Numbers.each_with_index { |num,i| line.gsub!(num, (i+1).to_s) }
+    replace_first_and_last(line)
     puts "after>  #{line}"
     first_number = line.match(/\d+/)[0][0].to_i
     last_number = line.reverse.match(/\d+/)[0][0].to_i
