@@ -1,8 +1,16 @@
 require 'byebug'
 
-contents = File.read("day1-seed1.txt").split("\n").compact
-
 Numbers = %w[one two three four five six seven eight nine]
+
+def fix_data(data)
+  data.gsub!(/oneight/, "oneeight")
+  data.gsub!(/threeight/, "threeeight")
+  data.gsub!(/fiveight/, "fiveeight")
+  data.gsub!(/nineight/, "nineeight")
+  data.gsub!(/twone/, "twoone")
+  data.gsub!(/sevenine/, "sevennine")
+  data.gsub!(/eightwo/, "eighttwo")
+end
 
 def word_to_digit(word)
   Numbers.index(word)+1
@@ -39,5 +47,9 @@ def calib_val(line)
     puts "answer> #{answer}"
     answer
 end
+
+data = File.read("day1-seed1.txt")
+fix_data(data)
+contents = data.split("\n").compact
 
 puts contents.sum { |line| calib_val(line) }
