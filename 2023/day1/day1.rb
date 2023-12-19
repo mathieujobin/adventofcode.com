@@ -8,6 +8,19 @@ def word_to_digit(word)
   Numbers.index(word)+1
 end
 
+def replace_first_and_last(line)
+  forward_match = line.match(%r[(#{Numbers.join('|')})])
+  reverse_match = line.reverse.match(%r[(#{Numbers.map(&:reverse).join('|')})])
+  if forward_match
+      line.gsub!(forward_match[0], word_to_digit(forward_match[0]).to_s)
+  end
+  if reverse_match
+      bingo = reverse_match[0].reverse
+      puts bingo
+      line.gsub!(bingo, word_to_digit(bingo).to_s)
+  end
+end
+
 def replace_worded_numbers(line)
   while forward_match = line.match(%r[(#{Numbers.join('|')})])
     if forward_match
