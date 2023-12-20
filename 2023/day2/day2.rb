@@ -6,25 +6,29 @@ MaxCubes = {
     blue: 14,
 }
 
+puts 0x2D
+
 data = {}
 File.read('input.txt').split("\n").map do |line|
     game_id, bags = line.split(':')
     next if bags.nil?
 
-    bags.split(/[,;]/).map do |play|
-        cnt, color = play.split(' ')
-        data[game_id] ||= {}
-        data[game_id][color.to_sym] ||= 0
-        data[game_id][color.to_sym] += cnt.to_i
+    data[game_id] = {}
+    data[game_id][:status] = :possible
+
+    bags.split(/; */).each do |play|
+        play.split(/, */).each do |turns|
+
+            cnt, color = turns.split(' ')
+            if cnt.to_i > MaxCubes[color.to_sym]
+                data[game_id][:status] = :impossible
+                break
+            end
+        end
+
+        break if data[game_id][:status] == :impossible
     end
 
-    data[game_id][:status] = :possible
-    MaxCubes.keys.map do |color|
-        if data[game_id][color] && data[game_id][color] > MaxCubes[color]
-            data[game_id][:status] = :impossible
-            break
-        end
-    end
 end
 
 puts data.select{ |k, v| v[:status] != :possible }.inspect
