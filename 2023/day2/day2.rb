@@ -9,27 +9,33 @@ MaxCubes = {
 puts 0x2D
 
 data = {}
-File.read('input.txt').split("\n").map do |line|
+result = File.read('input.txt').split("\n").map do |line|
     game_id, bags = line.split(':')
     next if bags.nil?
 
     data[game_id] = {}
-    data[game_id][:status] = :possible
+    #data[game_id][:status] = :possible
 
     bags.split(/; */).each do |play|
         play.split(/, */).each do |turns|
 
             cnt, color = turns.split(' ')
-            if cnt.to_i > MaxCubes[color.to_sym]
-                data[game_id][:status] = :impossible
-                break
-            end
+            data[game_id][color] ||= 0
+            data[game_id][color] = cnt.to_i if cnt.to_i > data[game_id][color]
+
+            #if cnt.to_i > MaxCubes[color.to_sym]
+            #    data[game_id][:status] = :impossible
+            #    break
+            #end
         end
 
-        break if data[game_id][:status] == :impossible
+        #break if data[game_id][:status] == :impossible
     end
-
+    power = data[game_id].inject(1) { |sum, (k, v)| sum * v}
+    puts power
+    power
 end
 
-puts data.select{ |k, v| v[:status] != :possible }.inspect
-puts data.select{ |k, v| v[:status] == :possible }.keys.sum { _1.gsub('Game', '').to_i }
+puts result.sum
+#puts data.select{ |k, v| v[:status] != :possible }.inspect
+#puts data.select{ |k, v| v[:status] == :possible }.keys.sum { _1.gsub('Game', '').to_i }
