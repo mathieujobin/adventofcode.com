@@ -26,4 +26,23 @@ def part1(data)
   puts "No overlap count: #{no_overlap}"
 end
 
-part1(data)
+def part2(data)
+  right_count, no_overlap = 0, 0
+  data.each do |line|
+    ranges = line.split(',').map { |rg|
+      left, right = rg.split('-').map(&:to_i)
+      (left..right).to_a
+    }
+    if (ranges.first - ranges.last) == ranges.first
+      no_overlap += 1
+      puts "No overlap: #{line}"
+    else
+      right_count += 1
+      puts "some overlap: #{line}"
+    end
+  end
+  puts "Overlap count: #{right_count}"
+  puts "No overlap count: #{no_overlap}"
+end
+
+part2(data)
