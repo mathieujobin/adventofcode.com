@@ -31,22 +31,28 @@ def display_crates(crates)
   }.join("\n")
 end
 
-puts `head -n 10 day5-input.txt`
+puts `head -n 10 day5-input.txt` if $debug
 
-def part1(data)
+def part1(data, reverse: true)
   crates = read_crates(data)
-  display_crates(crates)
+  display_crates(crates) if $debug
 
   data.each do |line|
-    if match = line.match(/move (\d) from (\d) to (\d)/)
-      puts "moving #{match[1]} from #{match[2]} to #{match[3]}"
-      crates[match[3].to_i] += crates[match[2].to_i].pop(match[1].to_i).reverse
-      display_crates(crates)
-      # $stdin.gets
+    if match = line.match(/move (\d+) from (\d) to (\d)/)
+      to_move = crates[match[2].to_i].pop(match[1].to_i)
+      crates[match[3].to_i] += reverse ? to_move.reverse : to_move
+      if $debug
+        puts "moving #{match[1]} from #{match[2]} to #{match[3]}"
+        display_crates(crates)
+      end
+    else
+      puts line if $debug
     end
   end
-  crates
+  crates.map { |key, value| value.last }.join
 end
 
-answer = part1(data).map { |key, value| value.last }.join
+answer = part1(data)
 puts "Part 1: #{answer}, correct? #{answer == "TLNGFGMFN"}"
+answer = part1(data, reverse: false)
+puts "Part 2: #{answer}, correct? #{answer == "TLNGFGMFN"}"
