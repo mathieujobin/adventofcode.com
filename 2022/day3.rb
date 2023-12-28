@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 
+require 'debug'
+require 'colorize'
+
 def split_equal_length(line)
   line.chars.each_slice(line.length / 2).map(&:to_a)
 end
@@ -74,4 +77,20 @@ def part1
   end.sum
 end
 
-puts part1
+def part2
+  data = File.readlines('day3-input.txt').map(&:chomp)
+  data.each_slice(3).map do |slice|
+    common = slice.first.chars & slice.last.chars & slice[1].chars
+    badge = common.first
+
+    debugger if common.length != 1
+    a = slice.join.gsub(/[^#{badge}]/, '').length
+    b = slice.join.count(badge)
+    debugger if a != b
+    colored = slice.join.gsub(/#{badge}/, badge.red)
+    puts "There is #{a} #{badge} in #{colored}"
+    a
+  end.sum
+end
+
+puts part2
