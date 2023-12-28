@@ -77,19 +77,31 @@ def part1
   end.sum
 end
 
+def find_common(slice)
+  slice.first.chars & slice.last.chars & slice[1].chars
+end
+
+def debug
+  sample1 = 'vJrwpWtwJgWrhcsFMMfFFhFp
+  jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+  PmmdzqPrVvPwwTWBwg'
+  common = find_common(sample1.split("\n"))
+  badge = common.first
+  puts common
+  #b = sample1.count(badge)
+  x = Score[badge] || 0
+  puts x
+end
+
 def part2
   data = File.readlines('day3-input.txt').map(&:chomp)
   data.each_slice(3).map do |slice|
-    common = slice.first.chars & slice.last.chars & slice[1].chars
+    common = find_common(slice)
     badge = common.first
 
     debugger if common.length != 1
-    a = slice.join.gsub(/[^#{badge}]/, '').length
-    b = slice.join.count(badge)
-    debugger if a != b
-    colored = slice.join.gsub(/#{badge}/, badge.red)
-    puts "There is #{a} #{badge} in #{colored}"
-    a
+
+    x = Score[badge] || 0
   end.sum
 end
 
