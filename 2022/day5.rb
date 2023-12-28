@@ -42,10 +42,11 @@ def part1(data)
       puts "moving #{match[1]} from #{match[2]} to #{match[3]}"
       crates[match[3].to_i] += crates[match[2].to_i].pop(match[1].to_i).reverse
       display_crates(crates)
-      $stdin.gets
+      # $stdin.gets
     end
   end
   crates
 end
 
-puts part1(data).map { |key, value| value.last }.join
+answer = part1(data).map { |key, value| value.last }.join
+puts "Part 1: #{answer}, correct? #{answer == "TLNGFGMFN"}"
