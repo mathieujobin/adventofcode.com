@@ -21,10 +21,31 @@ def read_crates(data)
       end
     end
   end
+  stakes.delete(nil)
   stakes
 end
 
-puts read_crates(data)
+def display_crates(crates)
+  puts crates.map { |key, value|
+    ([key, ': '] + value).join
+  }.join("\n")
+end
+
+puts `head -n 10 day5-input.txt`
 
 def part1(data)
+  crates = read_crates(data)
+  display_crates(crates)
+
+  data.each do |line|
+    if match = line.match(/move (\d) from (\d) to (\d)/)
+      puts "moving #{match[1]} from #{match[2]} to #{match[3]}"
+      crates[match[3].to_i] += crates[match[2].to_i].pop(match[1].to_i).reverse
+      display_crates(crates)
+      $stdin.gets
+    end
+  end
+  crates
 end
+
+puts part1(data).map { |key, value| value.last }.join
