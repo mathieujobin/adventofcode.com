@@ -227,7 +227,8 @@ def sum_of_number_with_adjacent_symbol(data)
                 #puts "#{x}, #{y} => #{cell} / #{line}"
             end
         end
-        puts [y, line_numbers.uniq].inspect
+        #puts "#{line.join} (#{y})>> #{line_numbers.uniq}"
+        puts "#{y})>> #{line_numbers.uniq}"
         line_numbers.uniq.sum
     end.sum
 end
