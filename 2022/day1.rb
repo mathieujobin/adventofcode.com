@@ -24,4 +24,9 @@ def elf_with_largest_presents(elves)
 	elves.max_by { |k, v| v }
 end
 
-puts elf_with_largest_presents(elves)
+def sum_richest_elves(elves, max)
+	elves.values.sort.reverse.take(max).reduce(:+)
+end
+
+#puts elf_with_largest_presents(elves)
+puts sum_richest_elves(elves, 3)
